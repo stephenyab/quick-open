@@ -21,4 +21,7 @@ onMounted(() => {
   <div>{{ enterAction }}</div>
 
   <v-btn>测试</v-btn>
+
+  <v-btn density="compact" icon="mdi-plus"></v-btn>
+
 </template>
