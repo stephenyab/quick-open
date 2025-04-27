@@ -19,4 +19,6 @@ onMounted(() => {
   <div>Hello World！</div>
   <div>{{ route }}</div>
   <div>{{ enterAction }}</div>
+
+  <v-btn>测试</v-btn>
 </template>
