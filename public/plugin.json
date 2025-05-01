@@ -8,12 +8,11 @@
   },
   "features": [
     {
-      "code": "quickOpenSetting",
-      "explain": "quickOpenSetting",
+      "code": "quick-open-setting",
+      "explain": "quick-open-setting",
       "cmds": [
-        "quickOpen",
-        "quickOpenSetting",
-        "qo"
+        "quick-open",
+        "quick-open-setting"
       ]
     }
   ]
