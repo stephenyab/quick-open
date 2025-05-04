@@ -3,7 +3,19 @@ import 'vuetify/styles'
 import {aliases, mdi} from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css'
 
-import {VBtn, VCard, VDialog} from 'vuetify/components'
+import {
+    VBtn,
+    VCard,
+    VCardActions,
+    VCardText,
+    VContainer,
+    VDialog,
+    VForm,
+    VSelect,
+    VSpacer,
+    VTextarea,
+    VTextField
+} from 'vuetify/components'
 
 import {createVuetify} from 'vuetify'
 
@@ -13,6 +25,6 @@ export default createVuetify({
             mdi,
         },
     }, components: {
-        VBtn, VCard, VDialog
+        VBtn, VCard, VCardText, VCardActions, VSpacer, VDialog, VForm, VTextField, VSelect, VContainer, VTextarea
     }
 })
