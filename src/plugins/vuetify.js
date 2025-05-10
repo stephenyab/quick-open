@@ -11,6 +11,8 @@ import {
     VContainer,
     VDialog,
     VForm,
+    VList,
+    VListItem,
     VSelect,
     VSpacer,
     VTab,
@@ -43,6 +45,8 @@ export default createVuetify({
         VTab,
         VTabs,
         VTabsWindow,
-        VTabsWindowItem
+        VTabsWindowItem,
+        VList,
+        VListItem
     }
 })

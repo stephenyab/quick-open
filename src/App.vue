@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue'
 import List from '@/views/list.vue'
+import Setting from '@/views/setting.vue'
 
 onMounted(() => {
   // window.utools.onPluginEnter((action) => {
@@ -27,7 +28,7 @@ const tab = ref('list')
       <list></list>
     </v-tabs-window-item>
     <v-tabs-window-item value="setting">
-
+      <setting></setting>
     </v-tabs-window-item>
   </v-tabs-window>
 </template>
