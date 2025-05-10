@@ -13,6 +13,10 @@ import {
     VForm,
     VSelect,
     VSpacer,
+    VTab,
+    VTabs,
+    VTabsWindow,
+    VTabsWindowItem,
     VTextarea,
     VTextField
 } from 'vuetify/components'
@@ -25,6 +29,20 @@ export default createVuetify({
             mdi,
         },
     }, components: {
-        VBtn, VCard, VCardText, VCardActions, VSpacer, VDialog, VForm, VTextField, VSelect, VContainer, VTextarea
+        VBtn,
+        VCard,
+        VCardText,
+        VCardActions,
+        VSpacer,
+        VDialog,
+        VForm,
+        VTextField,
+        VSelect,
+        VContainer,
+        VTextarea,
+        VTab,
+        VTabs,
+        VTabsWindow,
+        VTabsWindowItem
     }
 })
