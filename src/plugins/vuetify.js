@@ -13,6 +13,8 @@ import {
     VForm,
     VList,
     VListItem,
+    VListItemSubtitle,
+    VListItemTitle,
     VSelect,
     VSpacer,
     VTab,
@@ -47,6 +49,8 @@ export default createVuetify({
         VTabsWindow,
         VTabsWindowItem,
         VList,
-        VListItem
+        VListItem,
+        VListItemTitle,
+        VListItemSubtitle
     }
 })
