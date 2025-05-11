@@ -80,11 +80,31 @@ const handleWebDavConfigAddSubmit = () => {
 
   const result = saveData(postData)
   if (result.ok) {
+    successHintShow('保存成功')
     webDavConfigRefs[type].value = value
     handleWebDavConfigAddCancel()
   } else if (result.error) {
+    errorHintShow('保存失败：' + result.message)
     console.log(result.message)
   }
+}
+
+const successHint = ref(false)
+const successHintTimeout = ref(2000)
+const successHintMessage = ref('成功')
+const successHintShow = (message, timeout = 2000) => {
+  successHint.value = true
+  successHintTimeout.value = timeout
+  successHintMessage.value = message
+}
+
+const errorHint = ref(false)
+const errorHintTimeout = ref(2000)
+const errorHintMessage = ref('失败')
+const errorHintShow = (message, timeout = 2000) => {
+  errorHint.value = true
+  errorHintTimeout.value = timeout
+  errorHintMessage.value = message
 }
 </script>
 
@@ -128,6 +148,9 @@ const handleWebDavConfigAddSubmit = () => {
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <v-snackbar v-model="successHint" :timeout="successHintTimeout" color="success">{{ successHintMessage }}</v-snackbar>
+  <v-snackbar v-model="errorHint" :timeout="errorHintTimeout" color="error">{{ errorHintMessage }}</v-snackbar>
 </template>
 
 <style scoped>

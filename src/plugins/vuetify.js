@@ -16,6 +16,7 @@ import {
     VListItemSubtitle,
     VListItemTitle,
     VSelect,
+    VSnackbar,
     VSpacer,
     VTab,
     VTabs,
@@ -51,6 +52,7 @@ export default createVuetify({
         VList,
         VListItem,
         VListItemTitle,
-        VListItemSubtitle
+        VListItemSubtitle,
+        VSnackbar
     }
 })
