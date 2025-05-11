@@ -79,6 +79,7 @@ const addFormMessageRule = [
           </v-select>
 
           <v-text-field
+              autofocus
               label="关键字"
               v-model="addForm.code"
               :rules="addFormCodeRule"

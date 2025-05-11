@@ -137,7 +137,7 @@ const errorHintShow = (message, timeout = 2000) => {
   <v-dialog v-model="webDavConfigDialog">
     <v-card :title="webDavConfigDialogTitle">
       <v-card-text>
-        <v-text-field v-model="webDavConfigDialogValue" :type="webDavConfigDialogInputType"></v-text-field>
+        <v-text-field autofocus v-model="webDavConfigDialogValue" :type="webDavConfigDialogInputType"></v-text-field>
       </v-card-text>
 
       <v-card-actions>
