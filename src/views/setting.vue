@@ -20,11 +20,11 @@ const handleOpenAdd = title => {
 
 }
 
-const handleBackup = () => {
+const handleOpenBackup = () => {
 
 }
 
-const handleRestore = () => {
+const handleOpenRestore = async () => {
 
 }
 </script>
@@ -59,11 +59,11 @@ const handleRestore = () => {
       <v-list-item-title class="text-h5 mt-4">备份与恢复</v-list-item-title>
     </v-list-item>
 
-    <v-list-item @click="handleBackup">
+    <v-list-item @click="handleOpenBackup">
       <v-list-item-title>备份</v-list-item-title>
     </v-list-item>
 
-    <v-list-item @click="handleRestore">
+    <v-list-item @click="handleOpenRestore">
       <v-list-item-title>恢复</v-list-item-title>
     </v-list-item>
   </v-list>
