@@ -7,17 +7,10 @@ onMounted(() => {
   const keys = webDavConfig.map(item => webDavConfigStr + item.key)
   const result = getAllData(keys)
   if (isNotEmpty(result)) {
-    result.forEach(item => {
-      const key = item._id
-      const value = item.value
-      if (key.endsWith('webDavUrl')) {
-        webDavUrl.value = value
-      } else if (key.endsWith('webDavAccount')) {
-        webDavAccount.value = value
-      } else if (key.endsWith('webDavPassword')) {
-        webDavPassword.value = value
-      } else if (key.endsWith('webDavSubFolder')) {
-        webDavSubFolder.value = value
+    result.forEach(({_id: key, value}) => {
+      const configKey = key.split(webDavConfigStr)[1]
+      if (webDavConfigRefs[configKey]) {
+        webDavConfigRefs[configKey].value = value
       }
     })
   }
@@ -36,31 +29,26 @@ const webDavUrl = ref('')
 const webDavAccount = ref('')
 
 const webDavPassword = ref('')
-const webDavPasswordStar = computed(() => {
-  if (webDavPassword.value && webDavPassword.value.length > 0) {
-    return Array(webDavPassword.value.length).fill('*').join('')
-  } else {
-    return ''
-  }
-})
+const webDavPasswordStar = computed(() =>
+    webDavPassword.value.replace(/./g, '*')
+)
 
 const webDavSubFolder = ref('')
 
+const webDavConfigRefs = {
+  webDavUrl,
+  webDavAccount,
+  webDavPassword,
+  webDavSubFolder
+}
+
 const handleOpenAdd = type => {
   webDavConfigDialog.value = true
-  webDavConfigDialogType = type
+  webDavConfigDialogType.value = type
   webDavConfigDialogInputType.value = type === 'webDavPassword' ? 'password' : 'input'
   const item = webDavConfig.find(item => item.key === type)
   webDavConfigDialogTitle.value = item.title
-  if (type === 'webDavUrl') {
-    webDavConfigDialogValue.value = webDavUrl.value
-  } else if (type === 'webDavAccount') {
-    webDavConfigDialogValue.value = webDavAccount.value
-  } else if (type === 'webDavPassword') {
-    webDavConfigDialogValue.value = webDavPassword.value
-  } else if (type === 'webDavSubFolder') {
-    webDavConfigDialogValue.value = webDavSubFolder.value
-  }
+  webDavConfigDialogValue.value = webDavConfigRefs[type].value
 }
 
 const handleOpenBackup = () => {
@@ -71,8 +59,8 @@ const handleOpenRestore = async () => {
 
 }
 
-let webDavConfigDialogType = ''
 const webDavConfigDialog = ref(false)
+const webDavConfigDialogType = ref('')
 const webDavConfigDialogInputType = ref('')
 const webDavConfigDialogTitle = ref('')
 const webDavConfigDialogValue = ref('')
@@ -81,28 +69,18 @@ const handleWebDavConfigAddCancel = () => {
   webDavConfigDialog.value = false
 }
 const handleWebDavConfigAddSubmit = () => {
-  const id = webDavConfigStr + webDavConfigDialogType
+  const type = webDavConfigDialogType.value
+  const value = webDavConfigDialogValue.value.trim()
+  const id = webDavConfigStr + type
   const postData = {
     _id: id,
-    value: webDavConfigDialogValue.value
-  }
-
-  const oldData = getData(id)
-  if (oldData) {
-    postData._rev = oldData._rev
+    value: value,
+    _rev: getData(id)?._rev
   }
 
   const result = saveData(postData)
   if (result.ok) {
-    if (webDavConfigDialogType === 'webDavUrl') {
-      webDavUrl.value = webDavConfigDialogValue.value
-    } else if (webDavConfigDialogType === 'webDavAccount') {
-      webDavAccount.value = webDavConfigDialogValue.value
-    } else if (webDavConfigDialogType === 'webDavPassword') {
-      webDavPassword.value = webDavConfigDialogValue.value
-    } else if (webDavConfigDialogType === 'webDavSubFolder') {
-      webDavSubFolder.value = webDavConfigDialogValue.value
-    }
+    webDavConfigRefs[type].value = value
     handleWebDavConfigAddCancel()
   } else if (result.error) {
     console.log(result.message)
@@ -116,24 +94,11 @@ const handleWebDavConfigAddSubmit = () => {
       <v-list-item-title class="text-h5">WebDav 设置</v-list-item-title>
     </v-list-item>
 
-    <v-list-item @click="handleOpenAdd('webDavUrl')">
-      <v-list-item-title>WebDav 服务器地址</v-list-item-title>
-      <v-list-item-subtitle>{{ webDavUrl }}</v-list-item-subtitle>
-    </v-list-item>
-
-    <v-list-item @click="handleOpenAdd('webDavAccount')">
-      <v-list-item-title>WebDav 账号</v-list-item-title>
-      <v-list-item-subtitle>{{ webDavAccount }}</v-list-item-subtitle>
-    </v-list-item>
-
-    <v-list-item @click="handleOpenAdd('webDavPassword')">
-      <v-list-item-title>WebDav 密码</v-list-item-title>
-      <v-list-item-subtitle>{{ webDavPasswordStar }}</v-list-item-subtitle>
-    </v-list-item>
-
-    <v-list-item @click="handleOpenAdd('webDavSubFolder')">
-      <v-list-item-title>子文件夹</v-list-item-title>
-      <v-list-item-subtitle>{{ webDavSubFolder }}</v-list-item-subtitle>
+    <v-list-item v-for="item in webDavConfig" :key="item.key" @click="handleOpenAdd(item.key)">
+      <v-list-item-title>{{ item.title }}</v-list-item-title>
+      <v-list-item-subtitle>
+        {{ item.key === 'webDavPassword' ? webDavPasswordStar : webDavConfigRefs[item.key] }}
+      </v-list-item-subtitle>
     </v-list-item>
 
     <v-list-item>
