@@ -2,6 +2,7 @@
 import {computed, onMounted, ref} from 'vue'
 import {getAllData, getData, saveData} from '@/util/utoolsUtil'
 import {isNotEmpty} from '@/util/commonUtil'
+import {initWebDavClient, putFileContents} from '@/util/webDavUtil'
 
 onMounted(() => {
   const keys = webDavConfig.map(item => webDavConfigStr + item.key)
@@ -52,7 +53,16 @@ const handleOpenAdd = type => {
 }
 
 const handleOpenBackup = () => {
-
+  const fileName = `${new Date().getTime()}.json`
+  const tmpContent = [{time: new Date().getTime()}]
+  const fileContent = JSON.stringify(tmpContent, null, 2)
+  const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
+  putFileContents(webDavClient, fileName, fileContent, webDavSubFolder.value, true).then(() => {
+    successHintShow('备份成功')
+  }).catch(error => {
+    errorHintShow('备份失败：' + error.message)
+    console.log(error)
+  })
 }
 
 const handleOpenRestore = async () => {

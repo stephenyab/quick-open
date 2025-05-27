@@ -1,5 +1,5 @@
 import {createClient} from 'webdav'
-import {isEmpty} from "@/util/commonUtil.js"
+import {isEmpty, isNotEmpty} from "@/util/commonUtil.js"
 
 export function initWebDavClient(url, userName, password) {
     try {
@@ -26,4 +26,21 @@ export function getDirectoryContents(client, folderPath = '/') {
     } else {
         return []
     }
+}
+
+export function putFileContents(client, fileName, fileContent, subFolder = '', overwrite = false) {
+    return new Promise((resolve, reject) => {
+        try {
+            if (isNotEmpty(subFolder)) {
+                fileName = `/${subFolder}/${fileName}`
+            } else {
+                fileName = `/${fileName}`
+            }
+            client.putFileContents(fileName, fileContent, {overwrite: overwrite}).then(() => {
+                resolve()
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
 }
