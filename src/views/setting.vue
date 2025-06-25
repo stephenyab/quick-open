@@ -2,7 +2,7 @@
 import {computed, onMounted, ref} from 'vue'
 import {getAllData, getData, saveData} from '@/util/utoolsUtil'
 import {isNotEmpty} from '@/util/commonUtil'
-import {initWebDavClient, putFileContents} from '@/util/webDavUtil'
+import {getDirectoryContents, initWebDavClient, putFileContents} from '@/util/webDavUtil'
 
 onMounted(() => {
   const keys = webDavConfig.map(item => webDavConfigStr + item.key)
@@ -65,8 +65,21 @@ const handleOpenBackup = () => {
   })
 }
 
-const handleOpenRestore = async () => {
-
+let restoreFileList = []
+const restoreDialog = ref(false)
+const handleOpenRestore = () => {
+  restoreFileList = []
+  const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
+  getDirectoryContents(webDavClient, webDavSubFolder.value).then(result => {
+    restoreFileList = result instanceof Array ? result : [result]
+    restoreDialog.value = true
+  }).catch(error => {
+    errorHintShow('恢复失败：' + error.message)
+    console.log(error)
+  })
+}
+const handleRestoreDeal = item => {
+  console.log(item)
 }
 
 const webDavConfigDialog = ref(false)
@@ -161,6 +174,18 @@ const errorHintShow = (message, timeout = 2000) => {
 
   <v-snackbar v-model="successHint" :timeout="successHintTimeout" color="success">{{ successHintMessage }}</v-snackbar>
   <v-snackbar v-model="errorHint" :timeout="errorHintTimeout" color="error">{{ errorHintMessage }}</v-snackbar>
+
+  <v-dialog v-model="restoreDialog">
+    <v-card title="请选择恢复文件">
+      <v-card-text>
+        <v-list>
+          <v-list-item v-for="item in restoreFileList" style="padding: 0" @click="handleRestoreDeal(item)">
+            <v-list-item-title>{{ item.basename }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>

@@ -13,19 +13,24 @@ export function initWebDavClient(url, userName, password) {
 }
 
 export function getDirectoryContents(client, folderPath = '/') {
-    if (client) {
-        if (isEmpty(folderPath)) {
-            folderPath = '/'
+    return new Promise((resolve, reject) => {
+        if (client) {
+            if (isEmpty(folderPath)) {
+                folderPath = '/'
+            }
+            try {
+                client.getDirectoryContents(folderPath).then(result => {
+                    resolve(result)
+                }).catch(e => {
+                    reject(e)
+                })
+            } catch (e) {
+                reject(e)
+            }
+        } else {
+            resolve([])
         }
-        try {
-            return client.getDirectoryContents(folderPath)
-        } catch (e) {
-            console.error(e)
-            return []
-        }
-    } else {
-        return []
-    }
+    })
 }
 
 export function putFileContents(client, fileName, fileContent, subFolder = '', overwrite = false) {
