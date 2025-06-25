@@ -38,6 +38,8 @@ export function putFileContents(client, fileName, fileContent, subFolder = '', o
             }
             client.putFileContents(fileName, fileContent, {overwrite: overwrite}).then(() => {
                 resolve()
+            }).catch(e => {
+                reject(e)
             })
         } catch (e) {
             reject(e)
