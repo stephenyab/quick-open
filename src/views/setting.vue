@@ -2,7 +2,7 @@
 import {computed, onMounted, ref} from 'vue'
 import {getAllData, getData, saveData} from '@/util/utoolsUtil'
 import {isNotEmpty} from '@/util/commonUtil'
-import {getDirectoryContents, initWebDavClient, putFileContents} from '@/util/webDavUtil'
+import {getDirectoryContents, getFileContents, initWebDavClient, putFileContents} from '@/util/webDavUtil'
 
 onMounted(() => {
   const keys = webDavConfig.map(item => webDavConfigStr + item.key)
@@ -79,8 +79,15 @@ const handleOpenRestore = () => {
     console.log(error)
   })
 }
+
 const handleRestoreDeal = item => {
-  console.log(item)
+  const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
+  getFileContents(webDavClient, item.filename).then(result => {
+    console.log(result)
+  }).catch(error => {
+    errorHintShow('恢复失败：' + error.message)
+    console.log(error)
+  })
 }
 
 const webDavConfigDialog = ref(false)

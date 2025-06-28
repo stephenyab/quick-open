@@ -45,3 +45,11 @@ export async function putFileContents(client, fileName, fileContent, subFolder =
         throw error
     }
 }
+
+export async function getFileContents(client, fileName) {
+    try {
+        return await client.getFileContents(fileName, {format: 'text'})
+    } catch (error) {
+        throw error
+    }
+}
