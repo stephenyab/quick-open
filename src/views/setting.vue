@@ -71,7 +71,8 @@ const handleOpenRestore = () => {
   restoreFileList = []
   const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
   getDirectoryContents(webDavClient, webDavSubFolder.value).then(result => {
-    restoreFileList = result instanceof Array ? result : [result]
+    const tmpList = result instanceof Array ? result : [result]
+    restoreFileList = tmpList.filter(item => item.type === 'file')
     restoreDialog.value = true
   }).catch(error => {
     errorHintShow('恢复失败：' + error.message)

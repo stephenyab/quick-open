@@ -1,5 +1,4 @@
 import {createClient} from 'webdav'
-import {isEmpty, isNotEmpty} from "@/util/commonUtil.js"
 
 export function initWebDavClient(url, userName, password) {
     try {
@@ -12,42 +11,37 @@ export function initWebDavClient(url, userName, password) {
     }
 }
 
-export function getDirectoryContents(client, folderPath = '/') {
-    return new Promise((resolve, reject) => {
-        if (client) {
-            if (isEmpty(folderPath)) {
-                folderPath = '/'
-            }
-            try {
-                client.getDirectoryContents(folderPath).then(result => {
-                    resolve(result)
-                }).catch(e => {
-                    reject(e)
-                })
-            } catch (e) {
-                reject(e)
-            }
-        } else {
-            resolve([])
-        }
-    })
+export async function getDirectoryContents(client, folderPath = '/') {
+    if (!client) {
+        return []
+    }
+
+    if (typeof folderPath !== 'string' || !folderPath.trim()) {
+        folderPath = '/'
+    }
+
+    try {
+        return await client.getDirectoryContents(folderPath)
+    } catch (error) {
+        throw error
+    }
 }
 
-export function putFileContents(client, fileName, fileContent, subFolder = '', overwrite = false) {
-    return new Promise((resolve, reject) => {
-        try {
-            if (isNotEmpty(subFolder)) {
-                fileName = `/${subFolder}/${fileName}`
-            } else {
-                fileName = `/${fileName}`
-            }
-            client.putFileContents(fileName, fileContent, {overwrite: overwrite}).then(() => {
-                resolve()
-            }).catch(e => {
-                reject(e)
-            })
-        } catch (e) {
-            reject(e)
+export async function putFileContents(client, fileName, fileContent, subFolder = '', overwrite = false) {
+    try {
+        let normalizedSubFolder = ''
+        if (subFolder) {
+            normalizedSubFolder = `/${subFolder.trim().replace(/^\/+|\/+$/g, '')}`
         }
-    })
+
+        const filePath = normalizedSubFolder ? `${normalizedSubFolder}/${fileName}` : `/${fileName}`
+
+        if (normalizedSubFolder && !(await client.exists(normalizedSubFolder))) {
+            await client.createDirectory(normalizedSubFolder)
+        }
+
+        await client.putFileContents(filePath, fileContent, {overwrite})
+    } catch (error) {
+        throw error
+    }
 }
