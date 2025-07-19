@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import {computed, onMounted, ref} from 'vue'
-import {getAllData, getData, saveData} from '@/util/utoolsUtil'
+import {WEB_DAV_FIELD_PREFIX, WEB_DAV_FIELD_CONFIG } from '@/config/webDavConfig'
+import {getAllDataByKeys, getData, saveData} from '@/util/utoolsUtil'
 import {isNotEmpty} from '@/util/commonUtil'
 import {getDirectoryContents, getFileContents, initWebDavClient, putFileContents} from '@/util/webDavUtil'
 
 onMounted(() => {
   const keys = webDavConfig.map(item => webDavConfigStr + item.key)
-  const result = getAllData(keys)
+  const result = getAllDataByKeys(keys)
   if (isNotEmpty(result)) {
     result.forEach(({_id: key, value}) => {
       const configKey = key.split(webDavConfigStr)[1]
@@ -17,13 +18,8 @@ onMounted(() => {
   }
 })
 
-const webDavConfigStr = 'webDav/config/'
-const webDavConfig = [
-  {key: 'webDavUrl', title: 'WebDav 服务器地址'},
-  {key: 'webDavAccount', title: 'WebDav 账号'},
-  {key: 'webDavPassword', title: 'WebDav 密码'},
-  {key: 'webDavSubFolder', title: '子文件夹'},
-]
+const webDavConfigStr = WEB_DAV_FIELD_PREFIX
+const webDavConfig = WEB_DAV_FIELD_CONFIG
 
 const webDavUrl = ref('')
 

@@ -1,5 +1,10 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
+import {getAllListData} from '@/util/commonUtil'
+
+onMounted(() => {
+  initData()
+})
 
 const addDialog = ref(false)
 const addFormRef = ref()
@@ -52,6 +57,28 @@ const addFormMessageRule = [
     return '文件资源必填'
   }
 ]
+
+let allData = []
+const initData = () => {
+  allData = []
+  console.log(getAllListData())
+  getAllListData().forEach(item => {
+    let message = item.data.message
+    if (typeof message === 'string') {
+      message = message.split('\n')
+    }
+    allData.push({
+      id: item._id,
+      code: item.data.code,
+      message: message,
+      type: item.data.type,
+      rev: item._rev
+    })
+  })
+  allData.sort((first, second) => {
+    return String(first.id).localeCompare(String(second.id))
+  })
+}
 </script>
 
 <template>

@@ -2,7 +2,11 @@ export function getData(key) {
     return window.utools.db.get(key)
 }
 
-export function getAllData(keys) {
+export function getAllData() {
+    return window.utools.db.allDocs()
+}
+
+export function getAllDataByKeys(keys) {
     return window.utools.db.allDocs(keys)
 }
 
