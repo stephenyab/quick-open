@@ -185,13 +185,18 @@ const errorHintShow = (message, timeout = 2000) => {
 
   <v-dialog v-model="restoreDialog">
     <v-card title="请选择恢复文件">
-      <v-card-text>
+      <v-card-text style="overflow-y: auto">
         <v-list>
           <v-list-item v-for="item in restoreFileList" style="padding: 0" @click="handleRestoreDeal(item)">
             <v-list-item-title>{{ item.basename }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-card-text>
+
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn variant="text" color="red" @click="restoreDialog = false">取消</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
