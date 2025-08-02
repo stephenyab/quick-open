@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {getAllListData} from '@/util/commonUtil'
 
 onMounted(() => {
@@ -79,15 +79,57 @@ const initData = () => {
     return String(first.id).localeCompare(String(second.id))
   })
 }
+const getRealItemType = computed(typeCode => {
+  const typeItem = addFormTypeDict.find(item => item.code === String(typeCode))
+  if (typeItem) {
+    return typeItem.message
+  } else {
+    return typeCode
+  }
+})
 </script>
 
 <template>
-  <v-card title="Card title" text="..." class="item-card">
-    <v-card-actions>
-      <v-btn variant="text" color="red">删除</v-btn>
-      <v-btn variant="text" color="blue">修改</v-btn>
-    </v-card-actions>
-  </v-card>
+  <div style="display: flex">
+    <v-card class="item-card" style="width: 50%">
+      <v-card-title>Card title</v-card-title>
+      <v-card-subtitle>测试</v-card-subtitle>
+      <v-card-text>...</v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn variant="text" color="red">删除</v-btn>
+        <v-btn variant="text" color="blue">修改</v-btn>
+      </v-card-actions>
+    </v-card>
+
+    <v-card class="item-card" style="width: 50%">
+      <v-card-title>Card title</v-card-title>
+      <v-card-subtitle>测试</v-card-subtitle>
+      <v-card-text>...</v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn variant="text" color="red">删除</v-btn>
+        <v-btn variant="text" color="blue">修改</v-btn>
+      </v-card-actions>
+    </v-card>
+  </div>
+
+  <div style="display: flex">
+    <v-card v-for="(item, index) in allData" :key="index" class="item-card" style="width: 50%;">
+      <v-card-title>{{ item.code }}</v-card-title>
+      <v-card-subtitle>{{ getRealItemType(item.code) }}</v-card-subtitle>
+      <v-card-text>
+        <div v-for="(itemText, textIndex) in item.message" :key="textIndex">
+          {{ itemText }}
+        </div>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn variant="text" color="red">删除</v-btn>
+        <v-btn variant="text" color="blue">修改</v-btn>
+      </v-card-actions>
+    </v-card>
+  </div>
 
   <v-btn icon="mdi-plus" class="add-button" @click="handleOpenAdd"/>
 
