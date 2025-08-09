@@ -13,3 +13,11 @@ export function getAllDataByKeys(keys) {
 export function saveData(data) {
     return window.utools.db.put(data)
 }
+
+export function deleteData(key) {
+    window.utools.db.remove(key)
+}
+
+export function deleteFeature(key) {
+    window.utools.removeFeature(key)
+}

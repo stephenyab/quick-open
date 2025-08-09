@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {computed, onMounted, ref} from 'vue'
 import {getAllListData} from '@/util/commonUtil'
+import {deleteData, deleteFeature} from '@/util/utoolsUtil'
 
 onMounted(() => {
   initData()
@@ -61,7 +62,6 @@ const addFormMessageRule = [
 let allData = []
 const initData = () => {
   allData = []
-  console.log(getAllListData())
   getAllListData().forEach(item => {
     let message = item.data.message
     if (typeof message === 'string') {
@@ -87,6 +87,12 @@ const getRealItemType = computed(typeCode => {
     return typeCode
   }
 })
+
+const handleDeleteData = key => {
+  deleteData(key)
+  deleteFeature(key)
+  initData()
+}
 </script>
 
 <template>
@@ -97,7 +103,7 @@ const getRealItemType = computed(typeCode => {
       <v-card-text>...</v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" color="red">删除</v-btn>
+        <v-btn variant="text" color="red" @click="handleDeleteData('1')">删除</v-btn>
         <v-btn variant="text" color="blue">修改</v-btn>
       </v-card-actions>
     </v-card>
@@ -108,7 +114,7 @@ const getRealItemType = computed(typeCode => {
       <v-card-text>...</v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" color="red">删除</v-btn>
+        <v-btn variant="text" color="red" @click="handleDeleteData('1')">删除</v-btn>
         <v-btn variant="text" color="blue">修改</v-btn>
       </v-card-actions>
     </v-card>
@@ -125,7 +131,7 @@ const getRealItemType = computed(typeCode => {
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" color="red">删除</v-btn>
+        <v-btn variant="text" color="red" @click="handleDeleteData(item.code)">删除</v-btn>
         <v-btn variant="text" color="blue">修改</v-btn>
       </v-card-actions>
     </v-card>
