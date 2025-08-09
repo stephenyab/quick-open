@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, reactive, ref} from 'vue'
 import {getAllListData} from '@/util/commonUtil'
 import {deleteData, deleteFeature} from '@/util/utoolsUtil'
 
@@ -10,7 +10,7 @@ onMounted(() => {
 const addDialog = ref(false)
 const addFormRef = ref()
 const handleOpenAdd = () => {
-  addForm.value.type = '1'
+  addForm.type = '1'
   addDialog.value = true
 }
 const handleAddCancel = () => {
@@ -20,19 +20,19 @@ const handleAddCancel = () => {
 const handleAddSubmit = async () => {
   const {valid} = await addFormRef.value.validate()
   if (valid) {
-    console.log(addForm.value)
+    console.log(addForm)
 
     handleAddCancel()
   }
 }
-const addForm = ref({
+const addForm = reactive({
   type: '',
   code: '',
   message: ''
 })
 const addFormTypeDict = [
   {code: '1', message: '文件/文件夹'},
-  {code: '2', message: 'Shell脚本'}
+  {code: '2', message: 'Shell 脚本'}
 ]
 const addFormTypeRule = [
   value => {
@@ -93,6 +93,35 @@ const handleDeleteData = key => {
   deleteFeature(key)
   initData()
 }
+
+const editDialog = ref(false)
+const editFormRef = ref()
+const editForm = reactive({
+  type: '',
+  code: '',
+  oriCode: '',
+  message: '',
+  rev: ''
+})
+const handleOpenEdit = item => {
+  editDialog.value = true
+  Object.keys(editForm).forEach(key => {
+    editForm[key] = item[key]
+  })
+  editForm.oriCode = item.code
+}
+const handleEditCancel = () => {
+  editFormRef.value.reset()
+  editDialog.value = false
+}
+const handleEditSubmit = async () => {
+  const {valid} = await editFormRef.value.validate()
+  if (valid) {
+    console.log(editForm)
+
+    handleEditCancel()
+  }
+}
 </script>
 
 <template>
@@ -104,7 +133,7 @@ const handleDeleteData = key => {
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn variant="text" color="red" @click="handleDeleteData('1')">删除</v-btn>
-        <v-btn variant="text" color="blue">修改</v-btn>
+        <v-btn variant="text" color="blue" @click="handleOpenEdit({})">修改</v-btn>
       </v-card-actions>
     </v-card>
 
@@ -115,7 +144,7 @@ const handleDeleteData = key => {
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn variant="text" color="red" @click="handleDeleteData('1')">删除</v-btn>
-        <v-btn variant="text" color="blue">修改</v-btn>
+        <v-btn variant="text" color="blue" @click="handleOpenEdit({})">修改</v-btn>
       </v-card-actions>
     </v-card>
   </div>
@@ -132,7 +161,7 @@ const handleDeleteData = key => {
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn variant="text" color="red" @click="handleDeleteData(item.code)">删除</v-btn>
-        <v-btn variant="text" color="blue">修改</v-btn>
+        <v-btn variant="text" color="blue" @click="handleOpenEdit(item)">修改</v-btn>
       </v-card-actions>
     </v-card>
   </div>
@@ -174,6 +203,45 @@ const handleDeleteData = key => {
         <v-spacer></v-spacer>
         <v-btn variant="text" color="red" @click="handleAddCancel">取消</v-btn>
         <v-btn variant="text" color="blue" @click="handleAddSubmit">确定</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+
+  <v-dialog persistent v-model="editDialog">
+    <v-card title="修改">
+      <v-card-text>
+        <v-form ref="editFormRef">
+          <v-select
+              label="类型"
+              v-model="editForm.type"
+              :items="addFormTypeDict"
+              item-title="message"
+              item-value="code"
+              :rules="addFormTypeRule"
+              required>
+          </v-select>
+
+          <v-text-field
+              label="关键字"
+              v-model="editForm.code"
+              :rules="addFormCodeRule"
+              required>
+          </v-text-field>
+
+          <v-textarea
+              label="文件资源"
+              v-model="editForm.message"
+              :rules="addFormMessageRule"
+              required>
+          </v-textarea>
+        </v-form>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn variant="text" color="red" @click="handleEditCancel">取消</v-btn>
+        <v-btn variant="text" color="blue" @click="handleEditSubmit">确定</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
