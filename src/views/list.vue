@@ -1,11 +1,29 @@
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive, ref} from 'vue'
 import {getAllListData} from '@/util/commonUtil'
-import {deleteData, deleteFeature} from '@/util/utoolsUtil'
+import {deleteData, deleteFeature, getData, saveData, setFeature} from '@/util/utoolsUtil'
 
 onMounted(() => {
   initData()
 })
+
+const commonSaveData = (webForm, type) => {
+  const tmpData = {
+    _id: webForm.code,
+    data: {
+      code: webForm.code,
+      message: typeof webForm.message === 'string' ? webForm.message.split('\n') : webForm.message,
+      type: webForm.type
+    }
+  }
+  saveData(tmpData)
+
+  const operateType = webForm.type === '1' ? '打开' : '执行'
+  const operateMessage = addFormTypeDict.find(item => item.code === webForm.type).message
+  const explain = `${operateType} ${webForm.code} [${operateMessage}]`
+  const cmdData = [webForm.code]
+  setFeature(webForm.code, explain, cmdData)
+}
 
 const addDialog = ref(false)
 const addFormRef = ref()
@@ -20,9 +38,9 @@ const handleAddCancel = () => {
 const handleAddSubmit = async () => {
   const {valid} = await addFormRef.value.validate()
   if (valid) {
-    console.log(addForm)
-
+    commonSaveData(addForm, 1)
     handleAddCancel()
+    initData()
   }
 }
 const addForm = reactive({
@@ -45,6 +63,9 @@ const addFormTypeRule = [
 const addFormCodeRule = [
   value => {
     if (value) {
+      if (getData(value)) {
+        return '关键字已存在'
+      }
       return true
     }
     return '关键字必填'
@@ -59,15 +80,15 @@ const addFormMessageRule = [
   }
 ]
 
-let allData = []
+const allData = ref([])
 const initData = () => {
-  allData = []
+  let tmpData = []
   getAllListData().forEach(item => {
     let message = item.data.message
     if (typeof message === 'string') {
       message = message.split('\n')
     }
-    allData.push({
+    tmpData.push({
       id: item._id,
       code: item.data.code,
       message: message,
@@ -75,18 +96,15 @@ const initData = () => {
       rev: item._rev
     })
   })
-  allData.sort((first, second) => {
+  tmpData.sort((first, second) => {
     return String(first.id).localeCompare(String(second.id))
   })
+  allData.value = tmpData
 }
-const getRealItemType = computed(typeCode => {
+const getRealItemType = typeCode => {
   const typeItem = addFormTypeDict.find(item => item.code === String(typeCode))
-  if (typeItem) {
-    return typeItem.message
-  } else {
-    return typeCode
-  }
-})
+  return typeItem ? typeItem.message : typeCode
+}
 
 const handleDeleteData = key => {
   deleteData(key)
@@ -125,34 +143,10 @@ const handleEditSubmit = async () => {
 </script>
 
 <template>
-  <div style="display: flex">
-    <v-card class="item-card" style="width: 50%">
-      <v-card-title>Card title</v-card-title>
-      <v-card-subtitle>测试</v-card-subtitle>
-      <v-card-text>...</v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" color="red" @click="handleDeleteData('1')">删除</v-btn>
-        <v-btn variant="text" color="blue" @click="handleOpenEdit({})">修改</v-btn>
-      </v-card-actions>
-    </v-card>
-
-    <v-card class="item-card" style="width: 50%">
-      <v-card-title>Card title</v-card-title>
-      <v-card-subtitle>测试</v-card-subtitle>
-      <v-card-text>...</v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" color="red" @click="handleDeleteData('1')">删除</v-btn>
-        <v-btn variant="text" color="blue" @click="handleOpenEdit({})">修改</v-btn>
-      </v-card-actions>
-    </v-card>
-  </div>
-
-  <div style="display: flex">
-    <v-card v-for="(item, index) in allData" :key="index" class="item-card" style="width: 50%;">
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+    <v-card v-for="(item, index) in allData" :key="index" class="item-card">
       <v-card-title>{{ item.code }}</v-card-title>
-      <v-card-subtitle>{{ getRealItemType(item.code) }}</v-card-subtitle>
+      <v-card-subtitle>{{ getRealItemType(item.type) }}</v-card-subtitle>
       <v-card-text>
         <div v-for="(itemText, textIndex) in item.message" :key="textIndex">
           {{ itemText }}
@@ -207,7 +201,6 @@ const handleEditSubmit = async () => {
     </v-card>
   </v-dialog>
 
-
   <v-dialog persistent v-model="editDialog">
     <v-card title="修改">
       <v-card-text>
@@ -255,6 +248,6 @@ const handleEditSubmit = async () => {
 }
 
 .item-card {
-  margin: 5px;
+  margin: 4px;
 }
 </style>

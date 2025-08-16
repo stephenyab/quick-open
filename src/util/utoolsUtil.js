@@ -21,3 +21,9 @@ export function deleteData(key) {
 export function deleteFeature(key) {
     window.utools.removeFeature(key)
 }
+
+export function setFeature(code, explain, cmds) {
+    window.utools.setFeature({
+        code: code, explain: explain, cmds: cmds
+    })
+}
