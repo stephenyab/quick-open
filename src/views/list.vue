@@ -16,6 +16,15 @@ const commonSaveData = (webForm, type) => {
       type: webForm.type
     }
   }
+  if (type === '2') {
+    deleteFeature(webForm.code)
+    if (webForm.code === webForm.oriCode) {
+      tmpData._rev = webForm.rev
+    } else {
+      deleteData(webForm.oriCode)
+      deleteFeature(webForm.oriCode)
+    }
+  }
   saveData(tmpData)
 
   const operateType = webForm.type === '1' ? '打开' : '执行'
@@ -38,7 +47,7 @@ const handleAddCancel = () => {
 const handleAddSubmit = async () => {
   const {valid} = await addFormRef.value.validate()
   if (valid) {
-    commonSaveData(addForm, 1)
+    commonSaveData(addForm, '1')
     handleAddCancel()
     initData()
   }
@@ -71,7 +80,7 @@ const addFormCodeRule = [
     return '关键字必填'
   }
 ]
-const addFormMessageRule = [
+const commonFormMessageRule = [
   value => {
     if (value) {
       return true
@@ -127,6 +136,7 @@ const handleOpenEdit = item => {
     editForm[key] = item[key]
   })
   editForm.oriCode = item.code
+  editForm.message = item.message.join('\n')
 }
 const handleEditCancel = () => {
   editFormRef.value.reset()
@@ -135,11 +145,22 @@ const handleEditCancel = () => {
 const handleEditSubmit = async () => {
   const {valid} = await editFormRef.value.validate()
   if (valid) {
-    console.log(editForm)
-
+    commonSaveData(editForm, '2')
     handleEditCancel()
+    initData()
   }
 }
+const editFormCodeRule = [
+  value => {
+    if (value) {
+      if (editForm.code !== editForm.oriCode && getData(value)) {
+        return '关键字已存在'
+      }
+      return true
+    }
+    return '关键字必填'
+  }
+]
 </script>
 
 <template>
@@ -148,8 +169,10 @@ const handleEditSubmit = async () => {
       <v-card-title>{{ item.code }}</v-card-title>
       <v-card-subtitle>{{ getRealItemType(item.type) }}</v-card-subtitle>
       <v-card-text>
-        <div v-for="(itemText, textIndex) in item.message" :key="textIndex">
-          {{ itemText }}
+        <div class="message-ellipsis">
+          <p v-for="(itemText, textIndex) in item.message" :key="textIndex">
+            {{ itemText }}
+          </p>
         </div>
       </v-card-text>
       <v-card-actions>
@@ -187,7 +210,7 @@ const handleEditSubmit = async () => {
           <v-textarea
               label="文件资源"
               v-model="addForm.message"
-              :rules="addFormMessageRule"
+              :rules="commonFormMessageRule"
               required>
           </v-textarea>
         </v-form>
@@ -218,14 +241,14 @@ const handleEditSubmit = async () => {
           <v-text-field
               label="关键字"
               v-model="editForm.code"
-              :rules="addFormCodeRule"
+              :rules="editFormCodeRule"
               required>
           </v-text-field>
 
           <v-textarea
               label="文件资源"
               v-model="editForm.message"
-              :rules="addFormMessageRule"
+              :rules="commonFormMessageRule"
               required>
           </v-textarea>
         </v-form>
@@ -249,5 +272,14 @@ const handleEditSubmit = async () => {
 
 .item-card {
   margin: 4px;
+}
+
+.message-ellipsis {
+  height: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical
 }
 </style>
