@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "types": [
       "utools-api-types"
     ]
