@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import List from '@/views/list.vue'
 import Setting from '@/views/setting.vue'
 
@@ -15,6 +15,13 @@ onMounted(() => {
 
 // 选项卡
 const tab = ref('list')
+const listRef = ref()
+
+watch(tab, (newVal) => {
+  if (newVal === 'list' && listRef.value) {
+    listRef.value.initData()
+  }
+})
 </script>
 
 <template>
@@ -25,7 +32,7 @@ const tab = ref('list')
 
   <v-tabs-window v-model="tab">
     <v-tabs-window-item value="list">
-      <list></list>
+      <list ref="listRef"></list>
     </v-tabs-window-item>
     <v-tabs-window-item value="setting">
       <setting></setting>

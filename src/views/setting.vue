@@ -2,7 +2,7 @@
 import {computed, onMounted, ref} from 'vue'
 import {WEB_DAV_FIELD_PREFIX, WEB_DAV_FIELD_CONFIG } from '@/config/webDavConfig'
 import {getAllDataByKeys, getData, saveData} from '@/util/utoolsUtil'
-import {isNotEmpty, getAllListData} from '@/util/commonUtil'
+import {isNotEmpty, getAllListData, commonSaveData} from '@/util/commonUtil'
 import {getDirectoryContents, getFileContents, initWebDavClient, putFileContents} from '@/util/webDavUtil'
 
 onMounted(() => {
@@ -56,7 +56,12 @@ const handleOpenBackup = () => {
     return
   }
 
-  const fileName = `${new Date().getTime()}.json`
+  const date = new Date()
+  const yyyy = date.getFullYear()
+  const MM = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  const hash = Math.random().toString(36).substring(2, 10)
+  const fileName = `backup-${yyyy}-${MM}-${dd}-${hash}.json`
   const fileContent = JSON.stringify(listData, null, 2)
   const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
   putFileContents(webDavClient, fileName, fileContent, webDavSubFolder.value, true).then(() => {
@@ -82,14 +87,28 @@ const handleOpenRestore = () => {
   })
 }
 
-const handleRestoreDeal = item => {
-  const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
-  getFileContents(webDavClient, item.filename).then(result => {
-    console.log(result)
-  }).catch(error => {
+const handleRestoreDeal = async item => {
+  try {
+    const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
+    const result = await getFileContents(webDavClient, item.filename)
+    const backupData = JSON.parse(result)
+    
+    for (const dataItem of backupData) {
+      const webForm = {
+        code: dataItem.data.code,
+        message: dataItem.data.message,
+        type: dataItem.data.type,
+        rev: dataItem._rev
+      }
+      commonSaveData(webForm, '1')
+    }
+    
+    successHintShow('恢复成功')
+    restoreDialog.value = false
+  } catch (error) {
     errorHintShow('恢复失败：' + error.message)
     console.log(error)
-  })
+  }
 }
 
 const webDavConfigDialog = ref(false)
