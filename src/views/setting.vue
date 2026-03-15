@@ -2,7 +2,7 @@
 import {computed, onMounted, ref} from 'vue'
 import {WEB_DAV_FIELD_PREFIX, WEB_DAV_FIELD_CONFIG } from '@/config/webDavConfig'
 import {getAllDataByKeys, getData, saveData} from '@/util/utoolsUtil'
-import {isNotEmpty} from '@/util/commonUtil'
+import {isNotEmpty, getAllListData} from '@/util/commonUtil'
 import {getDirectoryContents, getFileContents, initWebDavClient, putFileContents} from '@/util/webDavUtil'
 
 onMounted(() => {
@@ -49,9 +49,15 @@ const handleOpenAdd = type => {
 }
 
 const handleOpenBackup = () => {
+  const listData = getAllListData()
+
+  if (!listData || listData.length === 0) {
+    infoHintShow('无数据可备份')
+    return
+  }
+
   const fileName = `${new Date().getTime()}.json`
-  const tmpContent = [{time: new Date().getTime()}]
-  const fileContent = JSON.stringify(tmpContent, null, 2)
+  const fileContent = JSON.stringify(listData, null, 2)
   const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
   putFileContents(webDavClient, fileName, fileContent, webDavSubFolder.value, true).then(() => {
     successHintShow('备份成功')
@@ -133,6 +139,15 @@ const errorHintShow = (message, timeout = 2000) => {
   errorHintTimeout.value = timeout
   errorHintMessage.value = message
 }
+
+const infoHint = ref(false)
+const infoHintTimeout = ref(2000)
+const infoHintMessage = ref('提示')
+const infoHintShow = (message, timeout = 2000) => {
+  infoHint.value = true
+  infoHintTimeout.value = timeout
+  infoHintMessage.value = message
+}
 </script>
 
 <template>
@@ -178,6 +193,7 @@ const errorHintShow = (message, timeout = 2000) => {
 
   <v-snackbar v-model="successHint" :timeout="successHintTimeout" color="success">{{ successHintMessage }}</v-snackbar>
   <v-snackbar v-model="errorHint" :timeout="errorHintTimeout" color="error">{{ errorHintMessage }}</v-snackbar>
+  <v-snackbar v-model="infoHint" :timeout="infoHintTimeout" color="warning">{{ infoHintMessage }}</v-snackbar>
 
   <v-dialog v-model="restoreDialog">
     <v-card title="请选择恢复文件">

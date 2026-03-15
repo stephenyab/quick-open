@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
-import {getAllListData} from '@/util/commonUtil'
+import {getAllListData, isEmpty} from '@/util/commonUtil'
 import {deleteData, deleteFeature, getData, saveData, setFeature} from '@/util/utoolsUtil'
 
 onMounted(() => {
@@ -10,6 +10,7 @@ onMounted(() => {
 const commonSaveData = (webForm, type) => {
   const tmpData = {
     _id: webForm.code,
+    _rev: '',
     data: {
       code: webForm.code,
       message: typeof webForm.message === 'string' ? webForm.message.split('\n') : webForm.message,
@@ -24,6 +25,9 @@ const commonSaveData = (webForm, type) => {
       deleteData(webForm.oriCode)
       deleteFeature(webForm.oriCode)
     }
+  }
+  if (isEmpty(tmpData._rev)) {
+    delete tmpData._rev
   }
   saveData(tmpData)
 
