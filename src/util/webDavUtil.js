@@ -21,7 +21,13 @@ export async function getDirectoryContents(client, folderPath = '/') {
     }
 
     try {
-        return await client.getDirectoryContents(folderPath)
+        const result = await client.getDirectoryContents(folderPath)
+        const items = result instanceof Array ? result : [result]
+        return items.sort((a, b) => {
+            const timeA = new Date(a.lastmod || a.lastModified || 0).getTime()
+            const timeB = new Date(b.lastmod || b.lastModified || 0).getTime()
+            return timeB - timeA
+        })
     } catch (error) {
         throw error
     }
