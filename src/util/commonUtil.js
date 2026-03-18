@@ -1,4 +1,5 @@
 import {WEB_DAV_FIELD_CONFIG, WEB_DAV_FIELD_PREFIX} from '@/config/webDavConfig'
+import {LOCAL_FIELD_CONFIG, LOCAL_FIELD_PREFIX} from '@/config/localConfig'
 import {getAllData, saveData, deleteData, deleteFeature, setFeature, getData} from '@/util/utoolsUtil'
 
 export const addFormTypeDict = [
@@ -15,9 +16,11 @@ export function isNotEmpty(value) {
 }
 
 export function getAllListData() {
-    const keys = WEB_DAV_FIELD_CONFIG.map(item => WEB_DAV_FIELD_PREFIX + item.key)
+    const webDavKeys = WEB_DAV_FIELD_CONFIG.map(item => WEB_DAV_FIELD_PREFIX + item.key)
+    const localKeys = LOCAL_FIELD_CONFIG.map(item => LOCAL_FIELD_PREFIX + item.key)
+    const configKeys = [...webDavKeys, ...localKeys]
     return getAllData().filter(item => {
-        return keys.indexOf(item._id) === -1
+        return configKeys.indexOf(item._id) === -1
     })
 }
 

@@ -52,5 +52,43 @@ window.services = {
         console.error('脚本错误:', stderr)
       }
     })
+  },
+  // 检查路径是否存在
+  checkPathExists (dirPath) {
+    return fs.existsSync(dirPath)
+  },
+  // 创建目录
+  createDirectory (dirPath) {
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true })
+    }
+    return true
+  },
+  // 写入备份文件
+  writeBackupFile (dirPath, fileName, content) {
+    const filePath = path.join(dirPath, fileName)
+    fs.writeFileSync(filePath, content, { encoding: 'utf-8' })
+    return filePath
+  },
+  // 读取备份文件列表
+  readBackupFileList (dirPath) {
+    if (!fs.existsSync(dirPath)) return []
+    const files = fs.readdirSync(dirPath)
+    return files
+      .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
+      .map(file => {
+        const filePath = path.join(dirPath, file)
+        const stat = fs.statSync(filePath)
+        return {
+          basename: file,
+          filename: filePath,
+          lastmod: stat.mtime.toISOString()
+        }
+      })
+      .sort((a, b) => new Date(b.lastmod) - new Date(a.lastmod))
+  },
+  // 读取备份文件内容
+  readBackupFile (filePath) {
+    return fs.readFileSync(filePath, { encoding: 'utf-8' })
   }
 }
