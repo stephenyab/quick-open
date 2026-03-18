@@ -1,0 +1,68 @@
+<script lang="ts" setup>
+import {onMounted, ref, watch} from 'vue'
+import List from '@/views/list.vue'
+import Setting from '@/views/setting.vue'
+import {getData} from '@/util/utoolsUtil'
+
+onMounted(() => {
+  window.utools.onPluginEnter((action) => {
+    const code = action.code
+    if (code === 'quick-open-setting') {
+      return
+    }
+    
+    window.utools.hideMainWindow()
+    
+    const dbData = getData(code)
+    if (!dbData || !dbData.data) {
+      window.utools.outPlugin()
+      return
+    }
+    
+    const { type, message } = dbData.data
+    const messageList = typeof message === 'string' ? message.split('\n') : message
+    
+    if (type === '1' && messageList.length > 0) {
+      window.services.openPath(messageList[0])
+    } else if (type === '2') {
+      messageList.forEach(cmd => {
+        if (cmd.trim()) {
+          window.services.execShell(cmd)
+        }
+      })
+    }
+    
+    window.utools.outPlugin()
+  })
+})
+
+// 选项卡
+const tab = ref('list')
+const listRef = ref()
+
+watch(tab, (newVal) => {
+  if (newVal === 'list' && listRef.value) {
+    listRef.value.initData()
+  }
+})
+</script>
+
+<template>
+  <v-tabs density="compact" v-model="tab">
+    <v-tab value="list">列表</v-tab>
+    <v-tab value="setting">设置</v-tab>
+  </v-tabs>
+
+  <v-tabs-window v-model="tab">
+    <v-tabs-window-item value="list">
+      <list ref="listRef"></list>
+    </v-tabs-window-item>
+    <v-tabs-window-item value="setting">
+      <setting></setting>
+    </v-tabs-window-item>
+  </v-tabs-window>
+</template>
+
+<style scoped>
+
+</style>
