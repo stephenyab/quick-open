@@ -48,21 +48,40 @@ watch(tab, (newVal) => {
 </script>
 
 <template>
-  <v-tabs density="compact" v-model="tab">
-    <v-tab value="list">列表</v-tab>
-    <v-tab value="setting">设置</v-tab>
-  </v-tabs>
+  <div class="app-container">
+    <v-tabs density="compact" v-model="tab" class="fixed-tabs">
+      <v-tab value="list">列表</v-tab>
+      <v-tab value="setting">设置</v-tab>
+    </v-tabs>
 
-  <v-tabs-window v-model="tab">
-    <v-tabs-window-item value="list">
-      <list ref="listRef"></list>
-    </v-tabs-window-item>
-    <v-tabs-window-item value="setting">
-      <setting></setting>
-    </v-tabs-window-item>
-  </v-tabs-window>
+    <div class="tabs-content">
+      <v-tabs-window v-model="tab">
+        <v-tabs-window-item value="list">
+          <list ref="listRef"></list>
+        </v-tabs-window-item>
+        <v-tabs-window-item value="setting">
+          <setting></setting>
+        </v-tabs-window-item>
+      </v-tabs-window>
+    </div>
+  </div>
 </template>
 
 <style scoped>
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
+.fixed-tabs {
+  flex-shrink: 0;
+}
+
+.tabs-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 </style>
