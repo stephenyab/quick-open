@@ -2,15 +2,38 @@
 import {onMounted, ref, watch} from 'vue'
 import List from '@/views/list.vue'
 import Setting from '@/views/setting.vue'
+import {getData} from '@/util/utoolsUtil'
 
 onMounted(() => {
-  // window.utools.onPluginEnter((action) => {
-  //   route.value = action.code
-  //   enterAction.value = action
-  // })
-  // window.utools.onPluginOut((isKill) => {
-  //   route.value = ''
-  // })
+  window.utools.onPluginEnter((action) => {
+    const code = action.code
+    if (code === 'quick-open-setting') {
+      return
+    }
+    
+    window.utools.hideMainWindow()
+    
+    const dbData = getData(code)
+    if (!dbData || !dbData.data) {
+      window.utools.outPlugin()
+      return
+    }
+    
+    const { type, message } = dbData.data
+    const messageList = typeof message === 'string' ? message.split('\n') : message
+    
+    if (type === '1' && messageList.length > 0) {
+      window.services.openPath(messageList[0])
+    } else if (type === '2') {
+      messageList.forEach(cmd => {
+        if (cmd.trim()) {
+          window.services.execShell(cmd)
+        }
+      })
+    }
+    
+    window.utools.outPlugin()
+  })
 })
 
 // 选项卡
