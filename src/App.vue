@@ -7,7 +7,7 @@ import {getData} from '@/util/utoolsUtil'
 onMounted(() => {
   window.utools.onPluginEnter((action) => {
     const code = action.code
-    if (code === 'quick-open-setting') {
+    if (code === 'quickOpenSetting') {
       return
     }
     

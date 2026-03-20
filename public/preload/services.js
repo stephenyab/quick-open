@@ -27,7 +27,12 @@ window.services = {
     const platform = process.platform
     let command
     if (platform === 'win32') {
-      command = `start "" "${filePath}"`
+      const ext = path.extname(filePath).toLowerCase()
+      if (ext === '.bat' || ext === '.cmd') {
+        command = `cmd /c start "" "${filePath}"`
+      } else {
+        command = `start "" "${filePath}"`
+      }
     } else if (platform === 'darwin') {
       command = `open "${filePath}"`
     } else {
