@@ -1,41 +1,18 @@
 <script setup>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {onMounted, ref, computed} from 'vue'
 import {getAllListData, saveEntry} from '@/services/entryService'
-import {deleteData, deleteFeature} from '@/util/utoolsUtil'
-import {ENTRY_TYPES, ENTRY_TYPE_FILE, getEntryTypeLabel, OPERATE_TYPE_CREATE, OPERATE_TYPE_UPDATE} from '@/constants/entryTypes'
-import {normalizeMessageToArray, normalizeMessageToString} from '@/domain/messageCodec'
-import {typeRequiredRule, messageRequiredRule, createAddCodeRule, createEditCodeRule} from '@/rules/formRules'
+import {deleteData, deleteFeature} from '@/utils/utoolsUtil'
+import {getEntryTypeLabel, OPERATE_TYPE_CREATE, OPERATE_TYPE_UPDATE} from '@/constants/entryTypes'
+import {normalizeMessageToArray} from '@/utils/messageCodec'
+import EntryDialog from '@/components/EntryDialog.vue'
 
 onMounted(() => {
   initData()
 })
 
-const addDialog = ref(false)
-const addFormRef = ref()
-const handleOpenAdd = () => {
-  addForm.type = ENTRY_TYPE_FILE
-  addDialog.value = true
-}
-const handleAddCancel = () => {
-  addFormRef.value.reset()
-  addDialog.value = false
-}
-const handleAddSubmit = async () => {
-  const {valid} = await addFormRef.value.validate()
-  if (valid) {
-    saveEntry(addForm, OPERATE_TYPE_CREATE)
-    handleAddCancel()
-    initData()
-  }
-}
-const addForm = reactive({
-  type: '',
-  code: '',
-  message: ''
-})
-const addFormCodeRule = createAddCodeRule()
-
 const allData = ref([])
+const existingCodes = computed(() => allData.value.map(item => item.code))
+
 const initData = () => {
   let tmpData = []
   getAllListData().forEach(item => {
@@ -54,6 +31,7 @@ const initData = () => {
   allData.value = tmpData
 }
 defineExpose({ initData })
+
 const getRealItemType = typeCode => {
   return getEntryTypeLabel(typeCode)
 }
@@ -64,36 +42,25 @@ const handleDeleteData = key => {
   initData()
 }
 
-const editDialog = ref(false)
-const editFormRef = ref()
-const editForm = reactive({
-  type: '',
-  code: '',
-  oriCode: '',
-  message: '',
-  rev: ''
-})
-const editFormOriCode = computed(() => editForm.oriCode)
-const editFormCodeRule = createEditCodeRule(editFormOriCode)
+const dialogVisible = ref(false)
+const dialogMode = ref('add')
+const currentEntry = ref({})
+
+const handleOpenAdd = () => {
+  dialogMode.value = 'add'
+  currentEntry.value = {}
+  dialogVisible.value = true
+}
+
 const handleOpenEdit = item => {
-  editDialog.value = true
-  Object.keys(editForm).forEach(key => {
-    editForm[key] = item[key]
-  })
-  editForm.oriCode = item.code
-  editForm.message = normalizeMessageToString(item.message)
+  dialogMode.value = 'edit'
+  currentEntry.value = {...item}
+  dialogVisible.value = true
 }
-const handleEditCancel = () => {
-  editFormRef.value.reset()
-  editDialog.value = false
-}
-const handleEditSubmit = async () => {
-  const {valid} = await editFormRef.value.validate()
-  if (valid) {
-    saveEntry(editForm, OPERATE_TYPE_UPDATE)
-    handleEditCancel()
-    initData()
-  }
+
+const handleDialogSubmit = (formData) => {
+  saveEntry(formData, formData.operateType)
+  initData()
 }
 </script>
 
@@ -119,82 +86,13 @@ const handleEditSubmit = async () => {
 
   <v-btn icon="mdi-plus" class="add-button" @click="handleOpenAdd"/>
 
-  <v-dialog persistent v-model="addDialog">
-    <v-card title="新增">
-      <v-card-text>
-        <v-form ref="addFormRef">
-          <v-select
-              label="类型"
-              v-model="addForm.type"
-              :items="ENTRY_TYPES"
-              item-title="message"
-              item-value="code"
-              :rules="typeRequiredRule"
-              required>
-          </v-select>
-
-          <v-text-field
-              autofocus
-              label="关键字"
-              v-model="addForm.code"
-              :rules="addFormCodeRule"
-              required>
-          </v-text-field>
-
-          <v-textarea
-              label="文件资源"
-              v-model="addForm.message"
-              :rules="messageRequiredRule"
-              required>
-          </v-textarea>
-        </v-form>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" color="red" @click="handleAddCancel">取消</v-btn>
-        <v-btn variant="text" color="blue" @click="handleAddSubmit">确定</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-
-  <v-dialog persistent v-model="editDialog">
-    <v-card title="修改">
-      <v-card-text>
-        <v-form ref="editFormRef">
-          <v-select
-              label="类型"
-              v-model="editForm.type"
-              :items="ENTRY_TYPES"
-              item-title="message"
-              item-value="code"
-              :rules="typeRequiredRule"
-              required>
-          </v-select>
-
-          <v-text-field
-              label="关键字"
-              v-model="editForm.code"
-              :rules="editFormCodeRule"
-              required>
-          </v-text-field>
-
-          <v-textarea
-              label="文件资源"
-              v-model="editForm.message"
-              :rules="messageRequiredRule"
-              required>
-          </v-textarea>
-        </v-form>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn variant="text" color="red" @click="handleEditCancel">取消</v-btn>
-        <v-btn variant="text" color="blue" @click="handleEditSubmit">确定</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <EntryDialog
+    v-model="dialogVisible"
+    :mode="dialogMode"
+    :entry="currentEntry"
+    :existing-codes="existingCodes"
+    @submit="handleDialogSubmit"
+  />
 </template>
 
 <style scoped>

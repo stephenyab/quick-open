@@ -2,9 +2,9 @@
 import {onMounted, ref, watch} from 'vue'
 import List from '@/views/list.vue'
 import Setting from '@/views/setting.vue'
-import {getData} from '@/util/utoolsUtil'
+import {getData} from '@/utils/utoolsUtil'
 import {ENTRY_TYPE_FILE, ENTRY_TYPE_SHELL} from '@/constants/entryTypes'
-import {normalizeMessageToArray} from '@/domain/messageCodec'
+import {normalizeMessageToArray} from '@/utils/messageCodec'
 
 onMounted(() => {
   window.utools.onPluginEnter((action) => {

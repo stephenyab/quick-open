@@ -10,4 +10,3 @@ export function normalizeMessageToString(message) {
     if (typeof message === 'string') return message
     return ''
 }
-

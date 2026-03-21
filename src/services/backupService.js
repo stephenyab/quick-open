@@ -1,5 +1,5 @@
 import {getAllListData, saveEntry} from '@/services/entryService'
-import {getDirectoryContents, getFileContents, initWebDavClient, putFileContents} from '@/util/webDavUtil'
+import {getDirectoryContents, getFileContents, initWebDavClient, putFileContents} from '@/utils/webDavUtil'
 import {OPERATE_TYPE_CREATE} from '@/constants/entryTypes'
 
 function buildBackupFileName(date = new Date()) {

@@ -1,5 +1,3 @@
-import {getData} from '@/util/utoolsUtil'
-
 export const typeRequiredRule = [
   value => {
     if (value) {
@@ -18,30 +16,16 @@ export const messageRequiredRule = [
   }
 ]
 
-export function createAddCodeRule() {
+export function createCodeRule(checkExists) {
   return [
     value => {
-      if (value) {
-        if (getData(value)) {
-          return '关键字已存在'
-        }
-        return true
+      if (!value) {
+        return '关键字必填'
       }
-      return '关键字必填'
-    }
-  ]
-}
-
-export function createEditCodeRule(oriCode) {
-  return [
-    value => {
-      if (value) {
-        if (value !== oriCode.value && getData(value)) {
-          return '关键字已存在'
-        }
-        return true
+      if (checkExists(value)) {
+        return '关键字已存在'
       }
-      return '关键字必填'
+      return true
     }
   ]
 }

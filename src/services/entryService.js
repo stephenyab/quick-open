@@ -1,8 +1,8 @@
 import {WEB_DAV_FIELD_CONFIG, WEB_DAV_FIELD_PREFIX} from '@/config/webDavConfig'
 import {LOCAL_FIELD_CONFIG, LOCAL_FIELD_PREFIX} from '@/config/localConfig'
-import {getAllData, saveData, deleteData, deleteFeature, setFeature, getData} from '@/util/utoolsUtil'
+import {getAllData, saveData, deleteData, deleteFeature, setFeature, getData} from '@/utils/utoolsUtil'
 import {getEntryTypeLabel, getOperateVerb, OPERATE_TYPE_UPDATE} from '@/constants/entryTypes'
-import {normalizeMessageToArray} from '@/domain/messageCodec'
+import {normalizeMessageToArray} from '@/utils/messageCodec'
 
 export function getAllListData() {
     const webDavKeys = WEB_DAV_FIELD_CONFIG.map(item => WEB_DAV_FIELD_PREFIX + item.key)
