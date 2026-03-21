@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup>
 import {onMounted, ref, watch} from 'vue'
 import List from '@/views/list.vue'
 import Setting from '@/views/setting.vue'

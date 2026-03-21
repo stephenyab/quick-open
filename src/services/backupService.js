@@ -16,6 +16,18 @@ function createNoDataError() {
     return err
 }
 
+function restoreFromBackupData(backupData) {
+    for (const dataItem of backupData) {
+        const webForm = {
+            code: dataItem.data.code,
+            message: dataItem.data.message,
+            type: dataItem.data.type,
+            rev: dataItem._rev
+        }
+        saveEntry(webForm, OPERATE_TYPE_CREATE)
+    }
+}
+
 export async function backupToWebDav({webDavUrl, webDavAccount, webDavPassword, webDavSubFolder}) {
     const listData = getAllListData()
     if (!listData || listData.length === 0) {
@@ -41,16 +53,7 @@ export async function restoreWebDavBackupFile({webDavUrl, webDavAccount, webDavP
     const webDavClient = initWebDavClient(webDavUrl, webDavAccount, webDavPassword)
     const result = await getFileContents(webDavClient, fileItem.filename)
     const backupData = JSON.parse(result)
-
-    for (const dataItem of backupData) {
-        const webForm = {
-            code: dataItem.data.code,
-            message: dataItem.data.message,
-            type: dataItem.data.type,
-            rev: dataItem._rev
-        }
-        saveEntry(webForm, OPERATE_TYPE_CREATE)
-    }
+    restoreFromBackupData(backupData)
 }
 
 export function backupToLocal({backupPath}) {
@@ -72,15 +75,6 @@ export function listLocalBackupFiles({backupPath}) {
 export function restoreLocalBackupFile({fileItem}) {
     const result = window.services.readBackupFile(fileItem.filename)
     const backupData = JSON.parse(result)
-
-    for (const dataItem of backupData) {
-        const webForm = {
-            code: dataItem.data.code,
-            message: dataItem.data.message,
-            type: dataItem.data.type,
-            rev: dataItem._rev
-        }
-        saveEntry(webForm, OPERATE_TYPE_CREATE)
-    }
+    restoreFromBackupData(backupData)
 }
 

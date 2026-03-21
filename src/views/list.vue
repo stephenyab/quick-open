@@ -1,9 +1,10 @@
-<script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+<script setup>
+import {computed, onMounted, reactive, ref} from 'vue'
 import {getAllListData, saveEntry} from '@/services/entryService'
-import {deleteData, deleteFeature, getData} from '@/util/utoolsUtil'
+import {deleteData, deleteFeature} from '@/util/utoolsUtil'
 import {ENTRY_TYPES, ENTRY_TYPE_FILE, getEntryTypeLabel, OPERATE_TYPE_CREATE, OPERATE_TYPE_UPDATE} from '@/constants/entryTypes'
 import {normalizeMessageToArray, normalizeMessageToString} from '@/domain/messageCodec'
+import {typeRequiredRule, messageRequiredRule, createAddCodeRule, createEditCodeRule} from '@/rules/formRules'
 
 onMounted(() => {
   initData()
@@ -32,33 +33,7 @@ const addForm = reactive({
   code: '',
   message: ''
 })
-const addFormTypeRule = [
-  value => {
-    if (value) {
-      return true
-    }
-    return '类型必填'
-  }
-]
-const addFormCodeRule = [
-  value => {
-    if (value) {
-      if (getData(value)) {
-        return '关键字已存在'
-      }
-      return true
-    }
-    return '关键字必填'
-  }
-]
-const commonFormMessageRule = [
-  value => {
-    if (value) {
-      return true
-    }
-    return '文件资源必填'
-  }
-]
+const addFormCodeRule = createAddCodeRule()
 
 const allData = ref([])
 const initData = () => {
@@ -98,6 +73,8 @@ const editForm = reactive({
   message: '',
   rev: ''
 })
+const editFormOriCode = computed(() => editForm.oriCode)
+const editFormCodeRule = createEditCodeRule(editFormOriCode)
 const handleOpenEdit = item => {
   editDialog.value = true
   Object.keys(editForm).forEach(key => {
@@ -118,17 +95,6 @@ const handleEditSubmit = async () => {
     initData()
   }
 }
-const editFormCodeRule = [
-  value => {
-    if (value) {
-      if (editForm.code !== editForm.oriCode && getData(value)) {
-        return '关键字已存在'
-      }
-      return true
-    }
-    return '关键字必填'
-  }
-]
 </script>
 
 <template>
@@ -163,7 +129,7 @@ const editFormCodeRule = [
               :items="ENTRY_TYPES"
               item-title="message"
               item-value="code"
-              :rules="addFormTypeRule"
+              :rules="typeRequiredRule"
               required>
           </v-select>
 
@@ -178,7 +144,7 @@ const editFormCodeRule = [
           <v-textarea
               label="文件资源"
               v-model="addForm.message"
-              :rules="commonFormMessageRule"
+              :rules="messageRequiredRule"
               required>
           </v-textarea>
         </v-form>
@@ -202,7 +168,7 @@ const editFormCodeRule = [
               :items="ENTRY_TYPES"
               item-title="message"
               item-value="code"
-              :rules="addFormTypeRule"
+              :rules="typeRequiredRule"
               required>
           </v-select>
 
@@ -216,7 +182,7 @@ const editFormCodeRule = [
           <v-textarea
               label="文件资源"
               v-model="editForm.message"
-              :rules="commonFormMessageRule"
+              :rules="messageRequiredRule"
               required>
           </v-textarea>
         </v-form>

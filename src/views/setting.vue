@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup>
 import {computed, onMounted, ref} from 'vue'
 import {WEB_DAV_FIELD_PREFIX, WEB_DAV_FIELD_CONFIG } from '@/config/webDavConfig'
 import {LOCAL_FIELD_PREFIX, LOCAL_FIELD_CONFIG } from '@/config/localConfig'
@@ -118,12 +118,12 @@ const handleOpenBackup = async () => {
   }
 }
 
-let restoreFileList = []
+const restoreFileList = ref([])
 const restoreDialog = ref(false)
 const handleOpenRestore = async () => {
-  restoreFileList = []
+  restoreFileList.value = []
   try {
-    restoreFileList = await listWebDavBackupFiles({
+    restoreFileList.value = await listWebDavBackupFiles({
       webDavUrl: webDavUrl.value,
       webDavAccount: webDavAccount.value,
       webDavPassword: webDavPassword.value,
@@ -179,10 +179,10 @@ const handleLocalBackup = async () => {
   }
 }
 
-let localRestoreFileList = []
+const localRestoreFileList = ref([])
 const localRestoreDialog = ref(false)
 const handleLocalRestore = () => {
-  localRestoreFileList = []
+  localRestoreFileList.value = []
   
   const backupPath = localBackupPath.value.trim()
   if (!backupPath) {
@@ -196,8 +196,8 @@ const handleLocalRestore = () => {
   }
 
   try {
-    localRestoreFileList = listLocalBackupFiles({backupPath})
-    if (localRestoreFileList.length === 0) {
+    localRestoreFileList.value = listLocalBackupFiles({backupPath})
+    if (localRestoreFileList.value.length === 0) {
       showInfo('本地备份路径下没有备份文件')
       return
     }
