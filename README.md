@@ -69,18 +69,35 @@ npm run build
 src/
 ├── App.vue              # 主应用组件
 ├── main.js              # 应用入口
+├── components/          # 公共组件
+│   ├── ConfigItem.vue       # 配置项组件
+│   ├── EntryDialog.vue      # 条目编辑对话框
+│   ├── LocalBackupSection.vue # 本地备份配置区域
+│   ├── RestoreFileDialog.vue # 恢复文件对话框
+│   └── WebDavSection.vue    # WebDAV 配置区域
+├── composables/         # 组合式函数
+│   ├── useHint.js           # 提示功能
+│   └── usePluginEnter.js    # 插件入口处理
 ├── config/              # 配置文件
-│   ├── webDavConfig.js  # WebDAV 配置
-│   └── localConfig.js   # 本地配置
+│   ├── webDavConfig.js      # WebDAV 配置
+│   └── localConfig.js       # 本地配置
+├── constants/           # 常量定义
+│   └── entryTypes.js        # 条目类型常量
 ├── plugins/             # 插件配置
-│   └── vuetify.js       # Vuetify 配置
-├── util/                # 工具函数
-│   ├── commonUtil.js    # 通用工具函数
-│   ├── utoolsUtil.js    # uTools API 封装
-│   └── webDavUtil.js    # WebDAV 客户端封装
+│   └── vuetify.js           # Vuetify 配置
+├── rules/               # 表单验证规则
+│   └── formRules.js         # 表单验证规则定义
+├── services/            # 服务层
+│   ├── backupService.js     # 备份服务
+│   └── entryService.js      # 条目管理服务
+├── utils/               # 工具函数
+│   ├── commonUtil.js        # 通用工具函数
+│   ├── utoolsUtil.js        # uTools API 封装
+│   ├── webDavUtil.js        # WebDAV 客户端封装
+│   └── messageCodec.js      # 消息编解码
 └── views/               # 页面视图
-    ├── list.vue         # 列表管理页面
-    └── setting.vue      # 设置页面
+    ├── list.vue             # 列表管理页面
+    └── setting.vue          # 设置页面
 ```
 
 ## 许可证
