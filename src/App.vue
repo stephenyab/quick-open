@@ -2,9 +2,10 @@
 import {ref, watch} from 'vue'
 import List from '@/views/list.vue'
 import Setting from '@/views/setting.vue'
-import {usePluginEnter} from '@/composables'
+import {usePluginEnter, createHintService} from '@/composables'
 
 usePluginEnter()
+const {hint, hintTimeout, hintMessage, hintColor} = createHintService()
 
 const tab = ref('list')
 const listRef = ref()
@@ -34,6 +35,8 @@ watch(tab, (newVal) => {
       </v-tabs-window>
     </div>
   </div>
+
+  <v-snackbar v-model="hint" :timeout="hintTimeout" :color="hintColor">{{ hintMessage }}</v-snackbar>
 </template>
 
 <style scoped>
