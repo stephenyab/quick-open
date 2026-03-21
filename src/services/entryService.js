@@ -1,7 +1,7 @@
 import {WEB_DAV_FIELD_CONFIG, WEB_DAV_FIELD_PREFIX} from '@/config/webDavConfig'
 import {LOCAL_FIELD_CONFIG, LOCAL_FIELD_PREFIX} from '@/config/localConfig'
 import {getAllData, saveData, deleteData, deleteFeature, setFeature, getData} from '@/utils/utoolsUtil'
-import {getEntryTypeLabel, getOperateVerb, OPERATE_TYPE_UPDATE} from '@/constants/entryTypes'
+import {getEntryTypeLabel, getOperateVerb, OPERATE_TYPE_UPDATE, ENTRY_TYPE_ARGS} from '@/constants/entryTypes'
 import {normalizeMessageToArray} from '@/utils/messageCodec'
 
 export function getAllListData() {
@@ -40,6 +40,9 @@ export function saveEntry(webForm, type) {
     const operateType = getOperateVerb(webForm.type)
     const operateMessage = getEntryTypeLabel(webForm.type)
     const explain = `${operateType} ${webForm.code} [${operateMessage}]`
-    const cmdData = [webForm.code]
+    let cmdData = [webForm.code]
+    if (webForm.type === ENTRY_TYPE_ARGS) {
+        cmdData = [{type: 'over', label: webForm.code}]
+    }
     setFeature(webForm.code, explain, cmdData)
 }

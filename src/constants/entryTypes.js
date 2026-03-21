@@ -1,5 +1,6 @@
 export const ENTRY_TYPE_FILE = '1'
 export const ENTRY_TYPE_SHELL = '2'
+export const ENTRY_TYPE_ARGS = '3'
 
 export const OPERATE_TYPE_CREATE = '1'
 export const OPERATE_TYPE_UPDATE = '2'
@@ -7,6 +8,7 @@ export const OPERATE_TYPE_UPDATE = '2'
 export const ENTRY_TYPES = [
     {code: ENTRY_TYPE_FILE, message: '文件/文件夹'},
     {code: ENTRY_TYPE_SHELL, message: 'Shell 脚本'},
+    {code: ENTRY_TYPE_ARGS, message: '传入参数'},
 ]
 
 export function getEntryTypeLabel(typeCode) {

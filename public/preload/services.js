@@ -45,6 +45,26 @@ window.services = {
       }
     })
   },
+  // 执行 shell 脚本并传入参数
+  execShellWithArgs (messageList, payload) {
+    if (!messageList || messageList.length === 0) return
+    messageList.forEach(cmd => {
+      if (cmd.trim()) {
+        const fullCommand = payload ? `${cmd.trim()} ${payload}` : cmd.trim()
+        exec(fullCommand, { shell: true }, (error, stdout, stderr) => {
+          if (error) {
+            console.error('执行脚本失败:', error)
+          }
+          if (stdout) {
+            console.log('脚本输出:', stdout)
+          }
+          if (stderr) {
+            console.error('脚本错误:', stderr)
+          }
+        })
+      }
+    })
+  },
   // 检查路径是否存在
   checkPathExists (dirPath) {
     return fs.existsSync(dirPath)
