@@ -3,6 +3,8 @@ import {onMounted, ref, watch} from 'vue'
 import List from '@/views/list.vue'
 import Setting from '@/views/setting.vue'
 import {getData} from '@/util/utoolsUtil'
+import {ENTRY_TYPE_FILE, ENTRY_TYPE_SHELL} from '@/constants/entryTypes'
+import {normalizeMessageToArray} from '@/domain/messageCodec'
 
 onMounted(() => {
   window.utools.onPluginEnter((action) => {
@@ -20,11 +22,11 @@ onMounted(() => {
     }
     
     const { type, message } = dbData.data
-    const messageList = typeof message === 'string' ? message.split('\n') : message
+    const messageList = normalizeMessageToArray(message)
     
-    if (type === '1' && messageList.length > 0) {
+    if (type === ENTRY_TYPE_FILE && messageList.length > 0) {
       window.services.openPath(messageList[0])
-    } else if (type === '2') {
+    } else if (type === ENTRY_TYPE_SHELL) {
       messageList.forEach(cmd => {
         if (cmd.trim()) {
           window.services.execShell(cmd)

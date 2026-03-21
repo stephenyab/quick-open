@@ -3,8 +3,18 @@ import {computed, onMounted, ref} from 'vue'
 import {WEB_DAV_FIELD_PREFIX, WEB_DAV_FIELD_CONFIG } from '@/config/webDavConfig'
 import {LOCAL_FIELD_PREFIX, LOCAL_FIELD_CONFIG } from '@/config/localConfig'
 import {getAllDataByKeys, getData, saveData} from '@/util/utoolsUtil'
-import {isNotEmpty, getAllListData, commonSaveData} from '@/util/commonUtil'
-import {getDirectoryContents, getFileContents, initWebDavClient, putFileContents} from '@/util/webDavUtil'
+import {isNotEmpty} from '@/util/commonUtil'
+import {
+  backupToLocal,
+  backupToWebDav,
+  listLocalBackupFiles,
+  listWebDavBackupFiles,
+  restoreLocalBackupFile,
+  restoreWebDavBackupFile
+} from '@/services/backupService'
+import {useHint} from '@/composables/useHint'
+
+const {hint, hintTimeout, hintMessage, hintColor, showSuccess, showError, showInfo} = useHint()
 
 onMounted(() => {
   const keys = webDavConfig.map(item => webDavConfigStr + item.key)
@@ -70,7 +80,7 @@ const handleLocalBackupPathCancel = () => {
 const handleLocalBackupPathSubmit = () => {
   const value = localBackupPathDialogValue.value.trim()
   if (value && !window.services.checkPathExists(value)) {
-    errorHintShow('路径不存在，请检查路径是否正确')
+    showError('路径不存在，请检查路径是否正确')
     return
   }
   const postData = {
@@ -80,109 +90,91 @@ const handleLocalBackupPathSubmit = () => {
   }
   const result = saveData(postData)
   if (result.ok) {
-    successHintShow('保存成功')
+    showSuccess('保存成功')
     localBackupPath.value = value
     handleLocalBackupPathCancel()
   } else if (result.error) {
-    errorHintShow('保存失败：' + result.message)
+    showError('保存失败：' + result.message)
     console.log(result.message)
   }
 }
 
-const handleOpenBackup = () => {
-  const listData = getAllListData()
-
-  if (!listData || listData.length === 0) {
-    infoHintShow('无数据可备份')
-    return
-  }
-
-  const date = new Date()
-  const yyyy = date.getFullYear()
-  const MM = String(date.getMonth() + 1).padStart(2, '0')
-  const dd = String(date.getDate()).padStart(2, '0')
-  const hash = Math.random().toString(36).substring(2, 10)
-  const fileName = `backup-${yyyy}-${MM}-${dd}-${hash}.json`
-  const fileContent = JSON.stringify(listData, null, 2)
-  const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
-  putFileContents(webDavClient, fileName, fileContent, webDavSubFolder.value, true).then(() => {
-    successHintShow('备份成功')
-  }).catch(error => {
-    errorHintShow('备份失败：' + error.message)
+const handleOpenBackup = async () => {
+  try {
+    await backupToWebDav({
+      webDavUrl: webDavUrl.value,
+      webDavAccount: webDavAccount.value,
+      webDavPassword: webDavPassword.value,
+      webDavSubFolder: webDavSubFolder.value
+    })
+    showSuccess('备份成功')
+  } catch (error) {
+    if (error && error.code === 'NO_DATA') {
+      showInfo(error.message)
+      return
+    }
+    showError('备份失败：' + error.message)
     console.log(error)
-  })
+  }
 }
 
 let restoreFileList = []
 const restoreDialog = ref(false)
-const handleOpenRestore = () => {
+const handleOpenRestore = async () => {
   restoreFileList = []
-  const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
-  getDirectoryContents(webDavClient, webDavSubFolder.value).then(result => {
-    const tmpList = result instanceof Array ? result : [result]
-    restoreFileList = tmpList.filter(item => item.type === 'file')
+  try {
+    restoreFileList = await listWebDavBackupFiles({
+      webDavUrl: webDavUrl.value,
+      webDavAccount: webDavAccount.value,
+      webDavPassword: webDavPassword.value,
+      webDavSubFolder: webDavSubFolder.value
+    })
     restoreDialog.value = true
-  }).catch(error => {
-    errorHintShow('恢复失败：' + error.message)
+  } catch (error) {
+    showError('恢复失败：' + error.message)
     console.log(error)
-  })
+  }
 }
 
 const handleRestoreDeal = async item => {
   try {
-    const webDavClient = initWebDavClient(webDavUrl.value, webDavAccount.value, webDavPassword.value)
-    const result = await getFileContents(webDavClient, item.filename)
-    const backupData = JSON.parse(result)
-    
-    for (const dataItem of backupData) {
-      const webForm = {
-        code: dataItem.data.code,
-        message: dataItem.data.message,
-        type: dataItem.data.type,
-        rev: dataItem._rev
-      }
-      commonSaveData(webForm, '1')
-    }
-    
-    successHintShow('恢复成功')
+    await restoreWebDavBackupFile({
+      webDavUrl: webDavUrl.value,
+      webDavAccount: webDavAccount.value,
+      webDavPassword: webDavPassword.value,
+      webDavSubFolder: webDavSubFolder.value,
+      fileItem: item
+    })
+
+    showSuccess('恢复成功')
     restoreDialog.value = false
   } catch (error) {
-    errorHintShow('恢复失败：' + error.message)
+    showError('恢复失败：' + error.message)
     console.log(error)
   }
 }
 
-const handleLocalBackup = () => {
-  const listData = getAllListData()
-
-  if (!listData || listData.length === 0) {
-    infoHintShow('无数据可备份')
-    return
-  }
-
+const handleLocalBackup = async () => {
   const backupPath = localBackupPath.value.trim()
   if (!backupPath) {
-    infoHintShow('请先设置本地备份路径')
+    showInfo('请先设置本地备份路径')
     return
   }
 
   if (!window.services.checkPathExists(backupPath)) {
-    errorHintShow('本地备份路径不存在，请检查路径是否正确')
+    showError('本地备份路径不存在，请检查路径是否正确')
     return
   }
 
   try {
-    const date = new Date()
-    const yyyy = date.getFullYear()
-    const MM = String(date.getMonth() + 1).padStart(2, '0')
-    const dd = String(date.getDate()).padStart(2, '0')
-    const hash = Math.random().toString(36).substring(2, 10)
-    const fileName = `backup-${yyyy}-${MM}-${dd}-${hash}.json`
-    const fileContent = JSON.stringify(listData, null, 2)
-    window.services.writeBackupFile(backupPath, fileName, fileContent)
-    successHintShow('本地备份成功')
+    backupToLocal({backupPath})
+    showSuccess('本地备份成功')
   } catch (error) {
-    errorHintShow('本地备份失败：' + error.message)
+    if (error && error.code === 'NO_DATA') {
+      showInfo(error.message)
+      return
+    }
+    showError('本地备份失败：' + error.message)
     console.log(error)
   }
 }
@@ -194,47 +186,35 @@ const handleLocalRestore = () => {
   
   const backupPath = localBackupPath.value.trim()
   if (!backupPath) {
-    infoHintShow('请先设置本地备份路径')
+    showInfo('请先设置本地备份路径')
     return
   }
 
   if (!window.services.checkPathExists(backupPath)) {
-    errorHintShow('本地备份路径不存在，请检查路径是否正确')
+    showError('本地备份路径不存在，请检查路径是否正确')
     return
   }
 
   try {
-    localRestoreFileList = window.services.readBackupFileList(backupPath)
+    localRestoreFileList = listLocalBackupFiles({backupPath})
     if (localRestoreFileList.length === 0) {
-      infoHintShow('本地备份路径下没有备份文件')
+      showInfo('本地备份路径下没有备份文件')
       return
     }
     localRestoreDialog.value = true
   } catch (error) {
-    errorHintShow('读取备份文件列表失败：' + error.message)
+    showError('读取备份文件列表失败：' + error.message)
     console.log(error)
   }
 }
 
 const handleLocalRestoreDeal = item => {
   try {
-    const result = window.services.readBackupFile(item.filename)
-    const backupData = JSON.parse(result)
-    
-    for (const dataItem of backupData) {
-      const webForm = {
-        code: dataItem.data.code,
-        message: dataItem.data.message,
-        type: dataItem.data.type,
-        rev: dataItem._rev
-      }
-      commonSaveData(webForm, '1')
-    }
-    
-    successHintShow('本地恢复成功')
+    restoreLocalBackupFile({fileItem: item})
+    showSuccess('本地恢复成功')
     localRestoreDialog.value = false
   } catch (error) {
-    errorHintShow('本地恢复失败：' + error.message)
+    showError('本地恢复失败：' + error.message)
     console.log(error)
   }
 }
@@ -260,40 +240,13 @@ const handleWebDavConfigAddSubmit = () => {
 
   const result = saveData(postData)
   if (result.ok) {
-    successHintShow('保存成功')
+    showSuccess('保存成功')
     webDavConfigRefs[type].value = value
     handleWebDavConfigAddCancel()
   } else if (result.error) {
-    errorHintShow('保存失败：' + result.message)
+    showError('保存失败：' + result.message)
     console.log(result.message)
   }
-}
-
-const successHint = ref(false)
-const successHintTimeout = ref(2000)
-const successHintMessage = ref('成功')
-const successHintShow = (message, timeout = 2000) => {
-  successHint.value = true
-  successHintTimeout.value = timeout
-  successHintMessage.value = message
-}
-
-const errorHint = ref(false)
-const errorHintTimeout = ref(2000)
-const errorHintMessage = ref('失败')
-const errorHintShow = (message, timeout = 2000) => {
-  errorHint.value = true
-  errorHintTimeout.value = timeout
-  errorHintMessage.value = message
-}
-
-const infoHint = ref(false)
-const infoHintTimeout = ref(2000)
-const infoHintMessage = ref('提示')
-const infoHintShow = (message, timeout = 2000) => {
-  infoHint.value = true
-  infoHintTimeout.value = timeout
-  infoHintMessage.value = message
 }
 </script>
 
@@ -351,9 +304,7 @@ const infoHintShow = (message, timeout = 2000) => {
     </v-card>
   </v-dialog>
 
-  <v-snackbar v-model="successHint" :timeout="successHintTimeout" color="success">{{ successHintMessage }}</v-snackbar>
-  <v-snackbar v-model="errorHint" :timeout="errorHintTimeout" color="error">{{ errorHintMessage }}</v-snackbar>
-  <v-snackbar v-model="infoHint" :timeout="infoHintTimeout" color="warning">{{ infoHintMessage }}</v-snackbar>
+  <v-snackbar v-model="hint" :timeout="hintTimeout" :color="hintColor">{{ hintMessage }}</v-snackbar>
 
   <v-dialog v-model="restoreDialog">
     <v-card title="请选择恢复文件">

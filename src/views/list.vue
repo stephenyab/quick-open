@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import {onMounted, reactive, ref} from 'vue'
-import {getAllListData, isEmpty, addFormTypeDict, commonSaveData} from '@/util/commonUtil'
+import {getAllListData, saveEntry} from '@/services/entryService'
 import {deleteData, deleteFeature, getData} from '@/util/utoolsUtil'
+import {ENTRY_TYPES, ENTRY_TYPE_FILE, getEntryTypeLabel, OPERATE_TYPE_CREATE, OPERATE_TYPE_UPDATE} from '@/constants/entryTypes'
+import {normalizeMessageToArray, normalizeMessageToString} from '@/domain/messageCodec'
 
 onMounted(() => {
   initData()
@@ -10,7 +12,7 @@ onMounted(() => {
 const addDialog = ref(false)
 const addFormRef = ref()
 const handleOpenAdd = () => {
-  addForm.type = '1'
+  addForm.type = ENTRY_TYPE_FILE
   addDialog.value = true
 }
 const handleAddCancel = () => {
@@ -20,7 +22,7 @@ const handleAddCancel = () => {
 const handleAddSubmit = async () => {
   const {valid} = await addFormRef.value.validate()
   if (valid) {
-    commonSaveData(addForm, '1')
+    saveEntry(addForm, OPERATE_TYPE_CREATE)
     handleAddCancel()
     initData()
   }
@@ -62,10 +64,7 @@ const allData = ref([])
 const initData = () => {
   let tmpData = []
   getAllListData().forEach(item => {
-    let message = item.data.message
-    if (typeof message === 'string') {
-      message = message.split('\n')
-    }
+    const message = normalizeMessageToArray(item.data.message)
     tmpData.push({
       id: item._id,
       code: item.data.code,
@@ -81,8 +80,7 @@ const initData = () => {
 }
 defineExpose({ initData })
 const getRealItemType = typeCode => {
-  const typeItem = addFormTypeDict.find(item => item.code === String(typeCode))
-  return typeItem ? typeItem.message : typeCode
+  return getEntryTypeLabel(typeCode)
 }
 
 const handleDeleteData = key => {
@@ -106,7 +104,7 @@ const handleOpenEdit = item => {
     editForm[key] = item[key]
   })
   editForm.oriCode = item.code
-  editForm.message = item.message.join('\n')
+  editForm.message = normalizeMessageToString(item.message)
 }
 const handleEditCancel = () => {
   editFormRef.value.reset()
@@ -115,7 +113,7 @@ const handleEditCancel = () => {
 const handleEditSubmit = async () => {
   const {valid} = await editFormRef.value.validate()
   if (valid) {
-    commonSaveData(editForm, '2')
+    saveEntry(editForm, OPERATE_TYPE_UPDATE)
     handleEditCancel()
     initData()
   }
@@ -135,7 +133,7 @@ const editFormCodeRule = [
 
 <template>
   <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
-    <v-card v-for="(item, index) in allData" :key="index" class="item-card">
+    <v-card v-for="item in allData" :key="item.id" class="item-card">
       <v-card-title>{{ item.code }}</v-card-title>
       <v-card-subtitle>{{ getRealItemType(item.type) }}</v-card-subtitle>
       <v-card-text>
@@ -162,7 +160,7 @@ const editFormCodeRule = [
           <v-select
               label="类型"
               v-model="addForm.type"
-              :items="addFormTypeDict"
+              :items="ENTRY_TYPES"
               item-title="message"
               item-value="code"
               :rules="addFormTypeRule"
@@ -201,7 +199,7 @@ const editFormCodeRule = [
           <v-select
               label="类型"
               v-model="editForm.type"
-              :items="addFormTypeDict"
+              :items="ENTRY_TYPES"
               item-title="message"
               item-value="code"
               :rules="addFormTypeRule"

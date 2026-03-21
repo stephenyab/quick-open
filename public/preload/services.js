@@ -1,6 +1,7 @@
 const fs = require('node:fs')
 const path = require('node:path')
 const { exec } = require('node:child_process')
+const { shell } = require('electron')
 
 // 通过 window 对象向渲染进程注入 nodejs 能力
 window.services = {
@@ -23,25 +24,11 @@ window.services = {
     return filePath
   },
   // 打开文件或文件夹
-  openPath (filePath) {
-    const platform = process.platform
-    let command
-    if (platform === 'win32') {
-      const ext = path.extname(filePath).toLowerCase()
-      if (ext === '.bat' || ext === '.cmd') {
-        command = `cmd /c start "" "${filePath}"`
-      } else {
-        command = `start "" "${filePath}"`
-      }
-    } else if (platform === 'darwin') {
-      command = `open "${filePath}"`
-    } else {
-      command = `xdg-open "${filePath}"`
-    }
-    exec(command, (error) => {
-      if (error) {
-        console.error('打开路径失败:', error)
-      }
+  openPath (paths) {
+    if (!paths) return
+    const pathList = paths.split('\n').filter(v => v.trim())
+    pathList.forEach(v => {
+      shell.openPath(v.trim())
     })
   },
   // 执行 shell 脚本
