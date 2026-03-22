@@ -1,4 +1,8 @@
 <script setup>
+/**
+ * WebDAV 备份设置区域组件
+ * 提供 WebDAV 配置、远程备份和恢复功能
+ */
 import {computed, onMounted, ref} from 'vue'
 import {WEB_DAV_FIELD_PREFIX, WEB_DAV_FIELD_CONFIG} from '@/config/webDavConfig'
 import {getAllDataByKeys, getData, saveData} from '@/utils/utoolsUtil'

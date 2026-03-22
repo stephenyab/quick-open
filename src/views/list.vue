@@ -1,4 +1,8 @@
 <script setup>
+/**
+ * 条目列表页面
+ * 展示所有条目，支持新增、编辑、删除操作
+ */
 import {onMounted, ref, computed} from 'vue'
 import {getAllListData, saveEntry} from '@/services/entryService'
 import {deleteData, deleteFeature} from '@/utils/utoolsUtil'

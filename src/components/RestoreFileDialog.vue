@@ -1,4 +1,8 @@
 <script setup>
+/**
+ * 恢复文件选择对话框组件
+ * 用于选择要恢复的备份文件
+ */
 import {computed} from 'vue'
 
 const props = defineProps({

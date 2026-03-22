@@ -1,4 +1,8 @@
 <script setup>
+/**
+ * 条目编辑对话框组件
+ * 支持新增和编辑两种模式
+ */
 import {computed, reactive, ref, watch} from 'vue'
 import {ENTRY_TYPES, OPERATE_TYPE_CREATE, OPERATE_TYPE_UPDATE} from '@/constants/entryTypes'
 import {normalizeMessageToString} from '@/utils/messageCodec'

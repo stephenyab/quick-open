@@ -1,4 +1,8 @@
 <script setup>
+/**
+ * 本地备份设置区域组件
+ * 提供本地备份路径配置、备份和恢复功能
+ */
 import {onMounted, ref} from 'vue'
 import {LOCAL_FIELD_PREFIX} from '@/config/localConfig'
 import {getData, saveData} from '@/utils/utoolsUtil'

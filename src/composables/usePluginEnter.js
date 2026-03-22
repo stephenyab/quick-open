@@ -1,8 +1,17 @@
+/**
+ * 插件入口钩子模块
+ * 处理 uTools 插件进入时的逻辑
+ */
 import {onMounted} from 'vue'
 import {getData} from '@/utils/utoolsUtil'
 import {ENTRY_TYPE_FILE, ENTRY_TYPE_SHELL, ENTRY_TYPE_ARGS} from '@/constants/entryTypes'
 import {normalizeMessageToArray} from '@/utils/messageCodec'
 
+/**
+ * 插件进入钩子
+ * 当用户通过关键字触发插件时执行相应操作
+ * 支持三种类型：文件/文件夹打开、Shell 脚本执行、参数传入执行
+ */
 export function usePluginEnter() {
     onMounted(() => {
         window.utools.onPluginEnter((action) => {
